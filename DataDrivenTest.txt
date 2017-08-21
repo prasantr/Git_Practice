@@ -1,0 +1,394 @@
+package KeyWordDrivenFramework;
+
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+
+public class Actions {
+	
+	
+	public static  WebDriver driver;
+	static String order;
+	
+	public static void initDriver(){
+		System.setProperty("webdriver.chrome.driver", "C:/Users/Hvuser/Downloads/chromedriver.exe");
+	    driver = new ChromeDriver();
+	    driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+	    driver.get("http://www.adactin.com/HotelApp/index.php");
+	                               }
+	public static void secondDriver(){
+		
+	    driver.get("http://www.adactin.com/HotelApp/SearchHotel.php");
+	                               }
+
+	 public static void EnterText(String locator,String ActionValue){
+		    driver.findElement(By.id(locator)).clear();
+			driver.findElement(By.id(locator)).sendKeys(ActionValue);
+	 }
+	 
+     public static void EnterPassword(String locator,String ActionValue){
+			driver.findElement(By.id(locator)).sendKeys(ActionValue+Keys.TAB);
+	 }
+     
+
+     public static void assertion(String locator,String ActionValue){
+			String actualValue = driver.findElement(By.id(locator)).getAttribute("value");
+			Assert.assertEquals(ActionValue, actualValue);
+						
+	 } 
+     
+		 
+	public static void click(String locatorType) {
+			driver.findElement(By.id(locatorType)).click();		
+		
+	}
+	
+	public static void select(String locator,String ActionValue) {
+		new Select(driver.findElement(By.id(locator))).selectByVisibleText(ActionValue);			
+		
+				
+    }
+	public static void waitAssert(String locator) {
+		WebDriverWait wait = new WebDriverWait(driver,10);
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.id(locator)));
+		String order = driver.findElement(By.id(locator)).getAttribute("value");
+		System.out.println(order);		
+		
+				
+    }
+	
+	
+	
+	
+	 
+	 
+	 }	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+package KeyWordDrivenFramework;
+	import java.io.File;
+	import java.io.FileInputStream;
+	import java.io.FileNotFoundException;
+	import java.io.FileOutputStream;
+	import java.io.IOException;
+	import java.lang.reflect.Array;
+	import java.util.ArrayList;
+
+	import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+	import org.apache.poi.ss.usermodel.Cell;
+	import org.apache.poi.ss.usermodel.Row;
+	import org.apache.poi.ss.usermodel.Workbook;
+	import org.apache.poi.xdgf.usermodel.XDGFSheet;
+	import org.apache.poi.xssf.usermodel.XSSFRow;
+	import org.apache.poi.xssf.usermodel.XSSFSheet;
+	import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+
+	public class ExcelOperations {
+		
+		public static  XSSFWorkbook excel;
+		public static XSSFSheet sheet;
+		public static FileOutputStream excel2;
+		
+		public static void createExcel(String path) throws FileNotFoundException, IOException{
+			
+			excel = new XSSFWorkbook(new FileInputStream(new File(path)));
+			
+		}
+		
+		public static void loadSheet(int sheetNo){
+			sheet = excel.getSheetAt(sheetNo);
+			
+		}
+		
+		public static  String read(int row, int column){
+			return sheet.getRow(row).getCell(column).getStringCellValue();
+			
+		}
+		
+	    public static void outputExcel(String path) throws FileNotFoundException, IOException{
+			
+			excel2 = new FileOutputStream(new File(path));
+			
+		}
+	    
+	    public static Object[][] readAll(){
+	    	Object[][] data = new Object[3][2];
+	    	
+	    	for (Row row: sheet)
+	    		for(Cell cell: row)
+	    			data[row.getRowNum()][cell.getColumnIndex()]=cell.getStringCellValue();   	
+	    	return data; 	
+	    	
+	    }
+	    
+	    	
+	    public static void write(int row, int column,String name){
+	    	Row roww = sheet.getRow(row);
+			Cell cell = roww.createCell(column);
+			cell.setCellValue(name);
+		    	
+	    }
+	    public static void closeExcel() throws IOException{
+	    	
+	       //excel.write(excel2);
+			
+			excel.close();
+	    }
+
+		
+	    
+}
+
+
+
+
+
+
+
+
+package KeyWordDrivenFramework;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+public class TestRunner {
+	/*public static  WebDriver driver;
+	static String order;*/
+	
+
+	@BeforeClass
+	void start(){
+
+   Actions.initDriver();
+		
+	}
+	@Test(priority = 1)
+	
+	void login() throws FileNotFoundException, IOException{
+		ExcelOperations.createExcel("C:/Users/Hvuser/Downloads/try.xlsx");
+		ExcelOperations.loadSheet(0);
+		
+		for (int rowN = 0; rowN<4;rowN++){
+			XSSFSheet sheet = ExcelOperations.sheet;
+			Row row = sheet.getRow(0);
+			Cell cell = row.getCell(0);
+			String text = cell.getStringCellValue();
+			
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("username"))
+				Actions.EnterText(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("password"))
+				Actions.EnterPassword(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("login"))
+				Actions.click(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue());
+			
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("assert"))
+				Actions.assertion(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(),ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			
+			
+			
+		}
+	}
+
+	@Test(priority = 2)
+	void zone() throws FileNotFoundException, IOException{
+		//Actions.secondDriver();
+		ExcelOperations.createExcel("C:/Users/Hvuser/Downloads/try.xlsx");
+		ExcelOperations.loadSheet(1);
+		
+		for (int rowN = 0; rowN<22;rowN++){
+			XSSFSheet sheet = ExcelOperations.sheet;
+			Row row = sheet.getRow(0);
+			Cell cell = row.getCell(0);
+			String text = cell.getStringCellValue();
+			
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("location"))
+				Actions.select(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());			
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("hotels"))
+				Actions.select(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("room_type"))
+				Actions.select(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("room_nos"))
+				Actions.select(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("datepick_in"))
+				Actions.EnterText(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("datepick_out"))
+				Actions.EnterText(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("adult_room"))
+				Actions.select(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("child_room"))
+				Actions.select(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("Submit"))
+				Actions.click(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue());		
+			
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("radiobutton_0"))
+				Actions.click(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue());								
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("continue"))
+				Actions.click(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue());		
+			
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("first_name"))
+				Actions.EnterText(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("last_name"))
+				Actions.EnterText(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("address"))
+				Actions.EnterText(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("cc_num"))
+				Actions.EnterText(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("cc_type"))
+				Actions.select(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("cc_exp_month"))
+				Actions.select(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("cc_exp_year"))
+				Actions.select(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("cc_cvv"))
+				Actions.EnterText(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue(), ExcelOperations.sheet.getRow(rowN).getCell(2).getStringCellValue());					
+			
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("book_now"))
+				Actions.click(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue());			
+			
+			if (ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue().equalsIgnoreCase("order_no"))
+				Actions.waitAssert(ExcelOperations.sheet.getRow(rowN).getCell(0).getStringCellValue());			
+			
+			
+						
+		}
+	}
+	
+	
+	
+}
+
+
+
+
+package DataDrivenFramework;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xdgf.usermodel.XDGFSheet;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+
+public class AdactinExcel {
+	
+	public static  XSSFWorkbook excel;
+	public static XSSFSheet sheet;
+	public static FileOutputStream excel2;
+	
+	public static void createExcel(String path) throws FileNotFoundException, IOException{
+		
+		excel = new XSSFWorkbook(new FileInputStream(new File(path)));
+		
+	}
+	
+	public static void loadSheet(int sheetNo){
+		sheet = excel.getSheetAt(sheetNo);
+		
+	}
+	
+	public static  String read(int row, int column){
+		return sheet.getRow(row).getCell(column).getStringCellValue();
+		
+	}
+	
+    public static void outputExcel(String path) throws FileNotFoundException, IOException{
+		
+		excel2 = new FileOutputStream(new File(path));
+		
+	}
+    
+    public static Object[][] readAll(){
+    	Object[][] data = new Object[3][2];
+    	
+    	for (Row row: sheet)
+    		for(Cell cell: row)
+    			data[row.getRowNum()][cell.getColumnIndex()]=cell.getStringCellValue();   	
+    	return data; 	
+    	
+    }
+    
+    	
+    public static void write(int row, int column,String name){
+    	Row roww = sheet.getRow(row);
+		Cell cell = roww.createCell(column);
+		cell.setCellValue(name);
+	    	
+    }
+    public static void closeExcel() throws IOException{
+    	
+       //excel.write(excel2);
+		
+		excel.close();
+    }
+    
+    
+    
+	    
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+}

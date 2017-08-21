@@ -1,0 +1,46 @@
+package DataDrivenFramework;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class AdactinDataDriven {
+	public static  WebDriver driver;
+	static String order;
+	
+	public static void openApp(){
+		System.setProperty("webdriver.chrome.driver", "C:/Users/Hvuser/Downloads/chromedriver.exe");
+	    driver = new ChromeDriver();
+	    driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+		
+		
+	}
+	public static void login(String susername,String spassword){
+		driver.get("http://www.adactin.com/HotelApp/index.php");
+		driver.findElement(By.id("username")).sendKeys(susername);
+		driver.findElement(By.id("password")).sendKeys(spassword);
+		driver.findElement(By.id("login")).click();		
+		
+	}
+
+	
+ public static  void main(String[] args) throws FileNotFoundException, IOException {
+	openApp();
+	AdactinExcel.createExcel("C:/Users/Hvuser/Downloads/Test.xlsx");
+	AdactinExcel.loadSheet(0);
+	for (int rowNum = 0;rowNum<3;rowNum++){
+		login(AdactinExcel.read(rowNum, 0),AdactinExcel.read(rowNum, 1));
+	}
+	
+ }
+	
+ }
+ 
